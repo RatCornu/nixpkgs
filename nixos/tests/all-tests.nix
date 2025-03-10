@@ -1154,6 +1154,7 @@ in {
   systemd-homed = handleTest ./systemd-homed.nix {};
   systemtap = handleTest ./systemtap.nix {};
   startx = runTest ./startx.nix;
+  szurubooru = handleTest ./szurubooru.nix {};
   taler = handleTest ./taler {};
   tandoor-recipes = handleTest ./tandoor-recipes.nix {};
   tandoor-recipes-script-name = handleTest ./tandoor-recipes-script-name.nix {};
