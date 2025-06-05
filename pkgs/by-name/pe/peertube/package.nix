@@ -48,23 +48,23 @@ let
 in
 stdenv.mkDerivation rec {
   pname = "peertube";
-  version = "7.1.1";
+  version = "7.2.0";
 
   src = fetchFromGitHub {
     owner = "Chocobozzz";
     repo = "PeerTube";
     tag = "v${version}";
-    hash = "sha256-rRga8pR/gfEFyVOkh1xmreM/ZVjiMre316/beCkjJP4=";
+    hash = "sha256-XntCoE8JhSMIfdWWigQ0F1z67p87CN5+873a5/Xty/0=";
   };
 
   yarnOfflineCacheServer = fetchYarnDeps {
     yarnLock = "${src}/yarn.lock";
-    hash = "sha256-Z6ACAkgk0RbcqVIjwKlCEZbZH0CHQU9sixJW73VyYDE=";
+    hash = "sha256-4EREpphYzYCeAGsOMVGCrmJrjJplvU3wuzhJpob4gaQ=";
   };
 
   yarnOfflineCacheClient = fetchYarnDeps {
     yarnLock = "${src}/client/yarn.lock";
-    hash = "sha256-fi1fSxL7EbsjQntnDj2S0WLVZWLcP6nLHXpsM0y5HRs=";
+    hash = "sha256-AWUnxC/cwtKCa70MKmHeOr6ussMYyQ5awQAnWYzCA1s=";
   };
 
   yarnOfflineCacheAppsCli = fetchYarnDeps {
@@ -74,7 +74,7 @@ stdenv.mkDerivation rec {
 
   yarnOfflineCacheAppsRunner = fetchYarnDeps {
     yarnLock = "${src}/apps/peertube-runner/yarn.lock";
-    hash = "sha256-R7oXJUT698l2D1WkQGTWfkmbC7bC1XJ04xT0O8bwuI8=";
+    hash = "sha256-t7H0VNLM48sTfctD9V2CFdi/0JRETu5cj/dBy6aNFW8=";
   };
 
   outputs = [
@@ -117,14 +117,30 @@ stdenv.mkDerivation rec {
 
     rm -rf node_modules/sass-embedded*
 
-    if [ -L "node_modules/.bin/sass" ]; then
-      rm node_modules/.bin/sass
-      ln -s ../sass/sass.js node_modules/.bin/sass
+    for sass_bin in \
+    "node_modules/.bin/sass" \
+    "node_modules/vite/node_modules/.bin/sass" \
+    "node_modules/@angular/build/node_modules/vite/node_modules/.bin/sass" \
+    "node_modules/@vitejs/plugin-basic-ssl/node_modules/vite/node_modules/.bin/sass"; do
+
+    if [ -L "$sass_bin" ]; then
+      rm "$sass_bin"
+      case "$sass_bin" in
+        "node_modules/.bin/sass")
+          ln -s "../sass/sass.js" "$sass_bin"
+          ;;
+        "node_modules/vite/node_modules/.bin/sass")
+          ln -s "../../../sass/sass.js" "$sass_bin"
+          ;;
+        "node_modules/@angular/build/node_modules/vite/node_modules/.bin/sass")
+          ln -s "../../../../../../sass/sass.js" "$sass_bin"
+          ;;
+        "node_modules/@vitejs/plugin-basic-ssl/node_modules/vite/node_modules/.bin/sass")
+          ln -s "../../../../../../sass/sass.js" "$sass_bin"
+          ;;
+      esac
     fi
-    if [ -L "node_modules/vite/node_modules/.bin/sass" ]; then
-      rm node_modules/vite/node_modules/.bin/sass
-      ln -s ../../../sass/sass.js node_modules/vite/node_modules/.bin/sass
-    fi
+    done
 
     cd ~/apps/peertube-cli
     yarn config --offline set yarn-offline-mirror $yarnOfflineCacheAppsCli
@@ -213,7 +229,7 @@ stdenv.mkDerivation rec {
 
   passthru.tests.peertube = nixosTests.peertube;
 
-  meta = with lib; {
+  meta = {
     description = "Free software to take back control of your videos";
     longDescription = ''
       PeerTube aspires to be a decentralized and free/libre alternative to video
@@ -229,7 +245,7 @@ stdenv.mkDerivation rec {
       though if the administrator of your instance had previously connected it
       with other instances.
     '';
-    license = licenses.agpl3Plus;
+    license = lib.licenses.agpl3Plus;
     homepage = "https://joinpeertube.org/";
     platforms = [
       "x86_64-linux"
@@ -237,7 +253,7 @@ stdenv.mkDerivation rec {
       # feasible, looking for maintainer to help out
       # "x86_64-darwin" "aarch64-darwin"
     ];
-    maintainers = with maintainers; [
+    maintainers = with lib.maintainers; [
       immae
       izorkin
       stevenroose
