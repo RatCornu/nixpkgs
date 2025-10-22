@@ -25,6 +25,7 @@ import ./make-test-python.nix (
           dataDir = "/var/lib/szurubooru";
 
           server = {
+            host = "127.0.0.1";
             port = 6666;
             settings = {
               domain = "http://127.0.0.1";
