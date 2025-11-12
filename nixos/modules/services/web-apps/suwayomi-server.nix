@@ -82,7 +82,7 @@ in
               };
 
               basicAuthEnabled = mkEnableOption ''
-                basic access authentication for Suwayomi-Server.
+                Basic access authentication for Suwayomi-Server.
                 Enabling this option is useful when hosting on a public network/the Internet
               '';
 
@@ -140,6 +140,18 @@ in
                   Whether to enable a system tray icon, if possible.
                 '';
               };
+
+              webUIEnabled = mkOption {
+                type = types.bool;
+                default = true;
+                description = ''
+                  Controls if Suwayomi will serve Suwayomi-WebUI.
+                  If set to true, it will use the webUI package defined in `webUIPackage`.
+                '';
+              };
+
+              # NOTE: this is not a real upstream option
+              webUIPackage = lib.mkPackageOption pkgs "suwayomi-webui" { };
             };
           };
         };
@@ -203,11 +215,19 @@ in
                 server.basicAuthPasswordFile = null;
                 server.basicAuthPassword =
                   if settings.server.basicAuthEnabled then "$TACHIDESK_SERVER_BASIC_AUTH_PASSWORD" else null;
+                server.webUIPackage = null;
               }
             )
             (lib.filterAttrsRecursive (_: x: x != null))
           ]
         );
+        configDir = "${cfg.dataDir}/.local/share/Tachidesk";
+        hoconConcatFile = pkgs.writeText "concat" ''
+          {
+            include "${cfg.package}/share/suwayomi-server/server.conf"
+            include "${configDir}/server.conf.bak"
+          }
+        '';
       in
       {
         description = "A free and open source manga reader server that runs extensions built for Tachiyomi.";
@@ -220,7 +240,12 @@ in
           ${lib.optionalString cfg.settings.server.basicAuthEnabled ''
             export TACHIDESK_SERVER_BASIC_AUTH_PASSWORD="$(<${cfg.settings.server.basicAuthPasswordFile})"
           ''}
-          ${lib.getExe pkgs.envsubst} -i ${configFile} -o ${cfg.dataDir}/.local/share/Tachidesk/server.conf
+          ${lib.getExe pkgs.envsubst} -i ${configFile} -o ${configDir}/server.conf.bak
+          ${lib.getExe pkgs.python3Packages.pyhocon} -i ${hoconConcatFile} -o ${configDir}/server.conf
+          rm ${configDir}/server.conf.bak
+          ${lib.optionalString cfg.settings.server.webUIEnabled ''
+            cp -R ${cfg.settings.server.webUIPackage} ${configDir}/webUI
+          ''}
           ${lib.getExe cfg.package} -Dsuwayomi.tachidesk.config.server.rootDir=${cfg.dataDir}
         '';
 
