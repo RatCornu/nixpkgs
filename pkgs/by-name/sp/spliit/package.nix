@@ -4,7 +4,7 @@
   fetchFromGitHub,
   openssl,
   prisma_6,
-  prisma-engines,
+  prisma-engines_6,
   nixosTests,
 }:
 
@@ -48,9 +48,9 @@ buildNpmPackage rec {
     rm -r $out/lib/node_modules/spliit2/{scripts,src}
     makeWrapper $out/lib/node_modules/spliit2/node_modules/.bin/next $out/bin/spliit \
       --chdir $out/lib/node_modules/spliit2 \
-      --set PRISMA_SCHEMA_ENGINE_BINARY ${lib.getExe' prisma-engines "schema-engine"} \
-      --set PRISMA_QUERY_ENGINE_BINARY ${lib.getExe' prisma-engines "query-engine"} \
-      --set PRISMA_QUERY_ENGINE_LIBRARY ${lib.getLib prisma-engines}/lib/libquery_engine.node \
+      --set PRISMA_SCHEMA_ENGINE_BINARY ${lib.getExe' prisma-engines_6 "schema-engine"} \
+      --set PRISMA_QUERY_ENGINE_BINARY ${lib.getExe' prisma-engines_6 "query-engine"} \
+      --set PRISMA_QUERY_ENGINE_LIBRARY ${lib.getLib prisma-engines_6}/lib/libquery_engine.node \
       --set NEXT_TELEMETRY_DISABLED 1 \
       --run "$out/lib/node_modules/spliit2/node_modules/.bin/prisma migrate deploy" \
       --add-flags start \
@@ -63,6 +63,10 @@ buildNpmPackage rec {
     "--omit=optional"
     "--omit=dev"
   ];
+
+  passthru.tests = {
+    inherit (nixosTests) spliit;
+  };
 
   meta = {
     changelog = "https://github.com/spliit-app/spliit/releases/tag/${src.tag}";
