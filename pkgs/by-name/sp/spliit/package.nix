@@ -64,6 +64,10 @@ buildNpmPackage rec {
     "--omit=dev"
   ];
 
+  passthru.tests = {
+    inherit (nixosTests) spliit;
+  };
+
   meta = {
     changelog = "https://github.com/spliit-app/spliit/releases/tag/${src.tag}";
     description = "Web UI for sharing expenses with your friends and family, a free and Open Source Alternative to Splitwise";
