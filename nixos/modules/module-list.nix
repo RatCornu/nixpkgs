@@ -1851,6 +1851,7 @@
   ./services/web-apps/snips-sh.nix
   ./services/web-apps/sogo.nix
   ./services/web-apps/speedtest-tracker.nix
+  ./services/web-apps/spliit.nix
   ./services/web-apps/sshwifty.nix
   ./services/web-apps/sstorytime.nix
   ./services/web-apps/stash.nix
