@@ -9,6 +9,7 @@
   nodejs,
   node-gyp,
   runCommand,
+  nix-update-script,
   nixosTests,
   immich-machine-learning,
   # build-time deps
@@ -232,6 +233,8 @@ stdenv.mkDerivation (finalAttrs: {
   '';
 
   passthru = {
+    updateScript = nix-update-script { };
+
     tests = {
       inherit (nixosTests) immich immich-vectorchord-reindex;
     };
