@@ -204,7 +204,7 @@ stdenvNoCC.mkDerivation (
       runHook preBuild
 
       echo "Building image with systemd-repart..."
-      unshare --map-root-user fakeroot systemd-repart \
+      fakeroot systemd-repart \
         ''${systemdRepartFlags[@]} \
         ${baseName}.raw \
         | tee repart-output.json
